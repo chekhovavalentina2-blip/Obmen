@@ -2,10 +2,16 @@ import requests
 import json
 from tkinter import *
 from tkinter import messagebox as mb
+from tkinter import ttk
 
+
+def update_c_label(event):
+    code = combobox.get()
+    name = cur[code]
+    c_label.config(text=name)
 
 def exchange():
-    code = entry.get()
+    code = combobox.get()
     if code:
         try:
             response = requests.get('https://open.er-api.com/v6/latest/USD')
@@ -13,7 +19,8 @@ def exchange():
             data = response.json()
             if code in data['rates']:
                 exchange_rate = data['rates'][code]
-                mb.showinfo("Курс обмена", f"Курс: 1 USD = {exchange_rate:.2f} {code}")
+                c_name = cur[code]
+                mb.showinfo("Курс обмена", f"Курс: 1 USD = {exchange_rate:.2f} {c_name}")
             else:
                 mb.showerror("Ошибка", f"Валюта {code} не найдена")
         except Exception as e:
@@ -22,14 +29,31 @@ def exchange():
         mb.showwarning("Внимание!", "Введите код валюты.")
 
 
+cur = {
+    "RUB": "Российский рубль", 
+    "EUR": "Евро", 
+    "GBP": "Фунт стерлингов",
+    "JPY": "Японская иена", 
+    "CNY": "Китайский юань", 
+    "KZT": "Казахстанский тенге", 
+    "UZS": "Узбекский сум", 
+    "CHF": "Швейцарский франк", 
+    "AED": "Дирхам ОАЭ", 
+    "CAD": "Канадский доллар"
+}
+
 window = Tk()
 window.title("Курсы обмена валют")
 window.geometry("360x180")
 
-Label(text="Введите код валюты").pack(padx=10, pady=10)
+Label(text="Выберите код валюты").pack(padx=10, pady=10)
 
-entry = Entry()
-entry.pack(padx=10, pady=10)
+combobox = ttk.Combobox(values=list(cur.keys()))
+combobox.pack(padx=10, pady=10)
+combobox.bind("<<ComboboxSelected>>", update_c_label)
+
+c_label = ttk.Label()
+c_label.pack(padx=10, pady=10)
 
 Button(text="Получить курс обмена к доллару", command=exchange).pack(padx=10, pady=10)
 
